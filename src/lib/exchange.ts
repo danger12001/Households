@@ -3,6 +3,7 @@
 
 export const LANDLORD_CURRENCIES = [
   { code: 'EUR', label: 'Euro (Netherlands / eurozone)' },
+  { code: 'ZAR', label: 'South African rand (no conversion)' },
   { code: 'GBP', label: 'British pound' },
   { code: 'USD', label: 'US dollar' },
   { code: 'AUD', label: 'Australian dollar' },
@@ -24,6 +25,8 @@ export interface RateQuote {
 
 /** How many `to` one unit of `from` buys. */
 export async function fetchRate(from: string, to: string): Promise<RateQuote> {
+  // Frankfurter rejects same-currency lookups; a rand-based landlord just needs 1.
+  if (from === to) return { rate: 1, date: new Date().toISOString().slice(0, 10) }
   const url = `https://api.frankfurter.dev/v1/latest?base=${encodeURIComponent(from)}&symbols=${encodeURIComponent(to)}`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`Exchange rate lookup failed (${response.status})`)

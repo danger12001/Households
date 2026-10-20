@@ -322,6 +322,7 @@ function CurrencyCard() {
   }
 
   const inverse = (rate: number) => (1 / rate).toFixed(2)
+  const converting = household.landlordCurrency !== household.currency
 
   return (
     <Card>
@@ -330,10 +331,17 @@ function CurrencyCard() {
       </Card.Header>
       <Card.Body>
         <p className="small mb-2">
-          Amounts are recorded in <strong>rand (ZAR)</strong>. Landlords also see them in{' '}
-          <strong>{household.landlordCurrency}</strong>.
+          Amounts are recorded in <strong>rand (ZAR)</strong>.
+          {converting ? (
+            <>
+              {' '}
+              Landlords also see them in <strong>{household.landlordCurrency}</strong>.
+            </>
+          ) : (
+            ' The landlord currency is also rand, so nothing is converted.'
+          )}
         </p>
-        {household.exchangeRate ? (
+        {!converting ? null : household.exchangeRate ? (
           <div className="mb-3">
             <div>
               1 {household.currency} = <strong>{household.exchangeRate}</strong> {household.landlordCurrency}
@@ -377,7 +385,11 @@ function CurrencyCard() {
                 ))}
               </Form.Select>
             </Form.Group>
+          </>
+        )}
 
+        {isLandlord && converting && (
+          <>
             <div className="small mb-2">
               Live ECB rate:{' '}
               {live ? (
