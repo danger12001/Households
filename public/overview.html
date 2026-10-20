@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>House Hub for Landlords</title>
+<meta name="description" content="What House Hub does today, what it costs to run, and the roadmap for landlords to approve.">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column for the pitch, widening to two-up grids for
+   features and the roadmap; the house's own artefacts (rent statement, pool
+   test) appear as small specimen cards instead of stock imagery. */
+:root {
+  color-scheme: light;
+  --paper: #f3f6f4;          /* page: off-white with a green bias, same as the app */
+  --surface: #ffffff;
+  --ink: #142019;            /* body text */
+  --muted: #56645c;
+  --rule: #d8e0db;
+  --brand: #0f5132;          /* House Hub green */
+  --brand-soft: #e1eee7;
+  --water: #0b6e8a;          /* pool-water secondary, used sparingly */
+  --water-soft: #e0f0f5;
+  --good: #1d7a46;
+  --warn: #9a6200;
+  --bad: #b3261e;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.6rem;
+  --step-3: clamp(2rem, 5vw, 3rem);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0e1512;
+    --surface: #16201b;
+    --ink: #e6eee9;
+    --muted: #9db0a5;
+    --rule: #2a3a31;
+    --brand: #5cc28d;
+    --brand-soft: #1a3326;
+    --water: #5fc3df;
+    --water-soft: #12303a;
+    --good: #5cc28d;
+    --warn: #e3b04b;
+    --bad: #f08a80;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0e1512;
+  --surface: #16201b;
+  --ink: #e6eee9;
+  --muted: #9db0a5;
+  --rule: #2a3a31;
+  --brand: #5cc28d;
+  --brand-soft: #1a3326;
+  --water: #5fc3df;
+  --water-soft: #12303a;
+  --good: #5cc28d;
+  --warn: #e3b04b;
+  --bad: #f08a80;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--step-0)/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 env(safe-area-inset-bottom, 0px);
+}
+.wrap { max-width: 68rem; margin: 0 auto; }
+.read { max-width: 42rem; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: var(--step-3); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: var(--step-2); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: var(--step-1); font-weight: 700; }
+p { margin: 0; }
+a { color: var(--brand); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, label:focus-within {
+  outline: 3px solid var(--water); outline-offset: 2px;
+}
+.label {
+  font: 600 0.75rem/1.2 var(--body);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Header band */
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.brand { display: flex; align-items: center; gap: 10px; font: 700 var(--step-1)/1 var(--display); color: var(--ink); text-decoration: none; }
+.brand svg { width: 32px; height: 32px; }
+.top nav { display: flex; flex-wrap: wrap; gap: 16px; font-size: var(--step--1); }
+
+section { padding-block: 56px; border-bottom: 1px solid var(--rule); }
+section:last-of-type { border-bottom: 0; }
+.section-head { display: grid; gap: 10px; margin-bottom: 28px; }
+.section-head p { color: var(--muted); max-width: 42rem; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 56px 48px; }
+.hero .lede { font-size: var(--step-1); color: var(--muted); margin-top: 16px; max-width: 34rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.fact { background: var(--brand-soft); color: var(--brand); border-radius: 999px; padding: 6px 12px; font-size: var(--step--1); font-weight: 600; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 600 var(--step-0)/1 var(--body);
+  padding: 12px 18px; border-radius: 8px; border: 1.5px solid var(--brand);
+  text-decoration: none; cursor: pointer;
+}
+.btn-solid { background: var(--brand); color: var(--surface); }
+.btn-ghost { background: transparent; color: var(--brand); }
+
+/* Specimen cards: the house's own documents */
+.specimens { display: grid; gap: 16px; }
+.specimen { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.specimen-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.specimen table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.specimen td { padding: 5px 0; border-top: 1px solid var(--rule); }
+.specimen td:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.example-tag { font: 500 0.7rem/1 var(--mono); color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 5px; }
+.owed { color: var(--bad); font-weight: 600; }
+.paid { color: var(--good); }
+.alt { color: var(--muted); font-size: 0.85em; }
+.pill { display: inline-block; font: 600 0.7rem/1 var(--body); text-transform: uppercase; letter-spacing: .06em; border-radius: 999px; padding: 4px 8px; }
+.pill-ok { background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good); }
+.pill-high { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.pill-low { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+
+/* Feature groups */
+.groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.group h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.group h3 .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--brand); flex: none; }
+.group.house h3 .dot { background: var(--water); }
+.group.access h3 .dot { background: var(--muted); }
+.group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.group li strong { display: block; font-weight: 600; }
+.group li span { color: var(--muted); font-size: var(--step--1); }
+
+/* Permissions table */
+.table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
+table.perm { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: var(--step--1); }
+table.perm th, table.perm td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.perm tr:last-child td { border-bottom: 0; }
+table.perm thead th { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+table.perm td:first-child { font-weight: 600; width: 30%; }
+
+/* Costs */
+.costs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.cost { border-top: 3px solid var(--brand); padding-top: 12px; display: grid; gap: 4px; }
+.cost .amount { font: 700 var(--step-2)/1.1 var(--display); }
+.cost p { color: var(--muted); font-size: var(--step--1); }
+
+/* Status list */
+.status { display: grid; gap: 10px; list-style: none; padding: 0; margin: 0; }
+.status li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.state { font: 600 0.75rem/1 var(--body); text-transform: uppercase; letter-spacing: .06em; }
+.state.done { color: var(--good); }
+.state.todo { color: var(--warn); }
+
+/* Roadmap / approvals */
+.roadmap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.item { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 20px; display: grid; gap: 12px; align-content: start; }
+.item-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.item-meta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: var(--step--1); }
+.item-meta dt { color: var(--muted); }
+.item-meta dd { margin: 0; }
+.choice { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice label {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  border: 1.5px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-size: var(--step--1); font-weight: 500;
+}
+.choice input { accent-color: var(--brand); margin: 0; }
+.choice label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.item textarea, .reply textarea, .reply input {
+  width: 100%; font: 400 var(--step--1)/1.5 var(--body); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; resize: vertical;
+}
+.reply { margin-top: 24px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 20px; display: grid; gap: 12px; }
+.reply-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+#copy-status { font-size: var(--step--1); color: var(--good); }
+.foot { padding-block: 32px 48px; color: var(--muted); font-size: var(--step--1); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .groups { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .costs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .roadmap { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  section { padding-block: 40px; }
+  .costs { grid-template-columns: minmax(0, 1fr); }
+  .status li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn { transition: transform .15s ease; }
+  .btn:hover { transform: translateY(-1px); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="brand" href="./">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0f5132"/><path d="M6 16 16 7l10 9v9a1 1 0 0 1-1 1h-6v-7h-6v7H7a1 1 0 0 1-1-1z" fill="#fff"/></svg>
+    House Hub
+  </a>
+  <nav aria-label="Sections">
+    <a href="#today">What it does</a>
+    <a href="#access">Who sees what</a>
+    <a href="#costs">Costs</a>
+    <a href="#roadmap">Roadmap &amp; approval</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div>
+    <div class="label">For Peter &amp; Kim</div>
+    <h1 style="margin-top:10px">The whole house, run from one app.</h1>
+    <p class="lede">Rent, shared bills, the pool, contractors and every receipt the tenants pay for, in one place you can check from the Netherlands. Tenants see what's theirs. You see everything, in rand and in euro.</p>
+    <div class="facts">
+      <span class="fact">Built and running</span>
+      <span class="fact">R0 a month to run</span>
+      <span class="fact">Works on any phone</span>
+      <span class="fact">Rand, with a euro view for landlords</span>
+    </div>
+    <div class="cta">
+      <a class="btn btn-solid" href="./">Open House Hub</a>
+      <a class="btn btn-ghost" href="#roadmap">Review the roadmap</a>
+    </div>
+  </div>
+
+  <div class="specimens" aria-label="Examples of what House Hub shows">
+    <div class="specimen">
+      <div class="specimen-head">
+        <strong>Rent – Nathan &amp; Sian</strong>
+        <span class="example-tag">EXAMPLE FIGURES</span>
+      </div>
+      <table>
+        <tr><td>Rent October 2026</td><td>R 9 500,00</td></tr>
+        <tr><td>Payment – EFT 03 Oct</td><td class="paid">−R 9 500,00</td></tr>
+        <tr><td>Rent November 2026</td><td>R 9 500,00</td></tr>
+        <tr><td><strong>Outstanding</strong></td><td class="owed">R 9 500,00 <span class="alt">≈ € in your view</span></td></tr>
+      </table>
+    </div>
+    <div class="specimen">
+      <div class="specimen-head">
+        <strong>Pool – water test</strong>
+        <span class="example-tag">EXAMPLE FIGURES</span>
+      </div>
+      <table>
+        <tr><td>pH <span class="alt">target 7.2–7.6</span></td><td>7.8 <span class="pill pill-high">high</span></td></tr>
+        <tr><td>Free chlorine <span class="alt">1–3 ppm</span></td><td>0.6 ppm <span class="pill pill-low">low</span></td></tr>
+        <tr><td>Total alkalinity <span class="alt">80–120 ppm</span></td><td>95 ppm <span class="pill pill-ok">ok</span></td></tr>
+        <tr><td>Chlorine granules in stock</td><td>1.5 kg <span class="pill pill-low">reorder</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<section id="today">
+  <div class="section-head">
+    <div class="label">Available now</div>
+    <h2>What House Hub does today</h2>
+    <p>Everything below is built and works now, on phones and computers. Amounts are recorded in rand; landlords see a euro conversion next to them at the daily European Central Bank rate, or at an estimate you set yourself.</p>
+  </div>
+  <div class="groups">
+    <div class="group money">
+      <h3><span class="dot"></span>Money</h3>
+      <ul>
+        <li><strong>Rent per tenant</strong><span>Monthly rent, due day, deposit and dated increases. A running statement shows what each tenant owes and when the next rent is due. Tenants report payments with proof; you confirm them.</span></li>
+        <li><strong>Expense claims</strong><span>Tenants claim what they paid for (dog food, pool chlorine, electronics) with a photo of the receipt, split equally, by shares or by exact amounts. Anyone charged can dispute their share.</span></li>
+        <li><strong>Who owes whom</strong><span>Balances across everyone, with the fewest payments needed to settle up.</span></li>
+        <li><strong>Municipal and utility bills</strong><span>Attach the bill and split it equally, by weight, by days each person lived in the house, or by sub-meter usage.</span></li>
+        <li><strong>Separate ledgers</strong><span>Running totals kept apart from the house accounts, such as a car being paid off. Each can belong to one tenant, sync with a Google Sheet, and import or export Excel files. Tenants request entries with a receipt photo; you approve them.</span></li>
+      </ul>
+    </div>
+    <div class="group house">
+      <h3><span class="dot"></span>The property</h3>
+      <ul>
+        <li><strong>Maintenance calendar</strong><span>Plumbers, electricians, the pool service and vet visits, one-off or repeating weekly, fortnightly or monthly.</span></li>
+        <li><strong>Contractors</strong><span>Every trade's details with tap-to-call and WhatsApp.</span></li>
+        <li><strong>Pool and other assets</strong><span>Water tests checked against target ranges, maintenance and issue logs with photos, and chemical stock that runs down as it's used. Garden, borehole, solar, and generator are ready to add.</span></li>
+        <li><strong>Meter readings</strong><span>Electricity and water readings with usage per day between readings.</span></li>
+      </ul>
+    </div>
+    <div class="group access">
+      <h3><span class="dot"></span>Access</h3>
+      <ul>
+        <li><strong>Invite by email</strong><span>Add a tenant's email and they're in when they sign in with Google or email and password.</span></li>
+        <li><strong>Landlord and tenant roles</strong><span>Enforced by the database itself, not just hidden buttons.</span></li>
+        <li><strong>Private where it matters</strong><span>A tenant sees only their own rent and ledgers, never anyone else's.</span></li>
+        <li><strong>Works offline</strong><span>Recent data stays on the phone, so the app opens instantly on patchy Wi-Fi.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="access">
+  <div class="section-head">
+    <div class="label">Permissions</div>
+    <h2>Who can see and change what</h2>
+    <p>Landlords manage everything. Tenants can read the shared house information and act only on their own money matters.</p>
+  </div>
+  <div class="table-scroll">
+    <table class="perm">
+      <thead><tr><th scope="col">Area</th><th scope="col">Landlords</th><th scope="col">Tenants</th></tr></thead>
+      <tbody>
+        <tr><td>Members, settings, currency</td><td>Manage</td><td>View</td></tr>
+        <tr><td>Rent</td><td>Set terms, record payments, charges and credits, confirm reported payments</td><td>See their own statement only; report a payment for confirmation</td></tr>
+        <tr><td>Expense claims</td><td>Manage all</td><td>Add and edit their own; dispute a share they're charged</td></tr>
+        <tr><td>Calendar, contractors, bills, meters, pool</td><td>Manage</td><td>View</td></tr>
+        <tr><td>Ledgers</td><td>Manage, approve requests, sync spreadsheets</td><td>See ledgers linked to them; request entries with a receipt photo</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="costs">
+  <div class="section-head">
+    <div class="label">Running costs</div>
+    <h2>What it costs to run</h2>
+    <p>House Hub runs on free tiers. The only costs on the roadmap are optional and called out on each item below.</p>
+  </div>
+  <div class="costs">
+    <div class="cost"><span class="label">Hosting</span><span class="amount">R0</span><p>GitHub Pages serves the app.</p></div>
+    <div class="cost"><span class="label">Database &amp; sign-in</span><span class="amount">R0</span><p>Firebase free plan, well within its limits for one household.</p></div>
+    <div class="cost"><span class="label">Receipt photos</span><span class="amount">R0</span><p>Compressed and stored in the database; no paid file storage.</p></div>
+    <div class="cost"><span class="label">Exchange rates</span><span class="amount">R0</span><p>Free daily ECB rates via Frankfurter.</p></div>
+  </div>
+</section>
+
+<section id="status">
+  <div class="section-head">
+    <div class="label">Where things stand</div>
+    <h2>Current status</h2>
+  </div>
+  <ul class="status read">
+    <li><span class="state done">Done</span><span>App built and tested: rent, expenses, balances, bills, calendar, contractors, pool and property, ledgers, currency.</span></li>
+    <li><span class="state done">Done</span><span>Firebase project, database and sign-in domains set up; security rules live.</span></li>
+    <li><span class="state todo">Next</span><span>Publish the latest security rules for rent and property, and switch on the public web address.</span></li>
+    <li><span class="state todo">Next</span><span>Add Peter, Kim, Nathan &amp; Sian and Paul as members, then set up each tenant's rent.</span></li>
+  </ul>
+</section>
+
+<section id="roadmap">
+  <div class="section-head">
+    <div class="label">For your approval</div>
+    <h2>Roadmap</h2>
+    <p>Choose <em>Approve</em>, <em>Not now</em> or <em>Questions</em> for each item, add a note if you like, then send your answers to Paul at the bottom of the page. Nothing here is built until you approve it.</p>
+  </div>
+
+  <form id="approvals" class="roadmap" novalidate>
+    <!-- Items are rendered from ROADMAP in the script below. -->
+  </form>
+
+  <div class="reply">
+    <h3>Send your answers</h3>
+    <label class="label" for="reply-name">Your name</label>
+    <input id="reply-name" type="text" autocomplete="name" placeholder="Peter or Kim">
+    <label class="label" for="reply-text">Your reply</label>
+    <textarea id="reply-text" rows="8" readonly></textarea>
+    <div class="reply-actions">
+      <a id="send-whatsapp" class="btn btn-solid" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+      <button id="copy-reply" class="btn btn-ghost" type="button">Copy text</button>
+      <span id="copy-status" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>House Hub · a private app for one household</span>
+  <span>Questions? Ask Paul.</span>
+</footer>
+
+</div>
+
+<script>
+const ROADMAP = [
+  {
+    id: 'meters',
+    title: 'Smart meter readings',
+    what: 'A small program on a Raspberry Pi at the house reads the Tuya electricity meters over the Wi-Fi every 15 minutes and records the kWh in House Hub automatically.',
+    gives: 'Accurate usage per meter without anyone reading meters by hand.',
+    needs: 'A Raspberry Pi at the house; a one-off setup with the Tuya app accounts.',
+    cost: 'Pi hardware if we don’t already have one; R0 to run.',
+  },
+  {
+    id: 'auto-split',
+    title: 'Electricity split by actual use',
+    what: 'When an electricity bill is added, each tenant’s share is worked out from their meter readings for that billing period.',
+    gives: 'Fair splits based on what each part of the house used.',
+    needs: 'Smart meter readings (above).',
+    cost: 'R0.',
+  },
+  {
+    id: 'tuya-api',
+    title: 'Connect smart-home apps via API',
+    what: 'Use Tuya’s cloud API (and later other smart-home apps) instead of reading meters on the local network, so data arrives even if the Pi is offline.',
+    gives: 'More devices and data, and a path to other smart-home brands.',
+    needs: 'A Tuya developer cloud project; the keys stay on the Pi, never in the app.',
+    cost: 'Free trial tier to start; a Tuya subscription if we outgrow it.',
+  },
+  {
+    id: 'reminders',
+    title: 'Rent and maintenance reminders',
+    what: 'Automatic reminders before rent is due, when a tenant falls behind, and the day before a contractor visit.',
+    gives: 'Fewer late payments and missed appointments.',
+    needs: 'A scheduled job on the Pi, or Firebase’s pay-as-you-go plan.',
+    cost: 'Expected R0 at our size; the Firebase plan needs a card on file.',
+  },
+  {
+    id: 'reading',
+    title: 'Read bills and receipts from photos',
+    what: 'Snap a municipal bill or a receipt and the amounts, dates and billing period are filled in for you to check.',
+    gives: 'Much less typing for tenants and landlords.',
+    needs: 'An AI service key kept on the Pi.',
+    cost: 'A few cents per photo.',
+  },
+  {
+    id: 'reports',
+    title: 'Monthly landlord report',
+    what: 'A one-page monthly summary in rand and euro: rent received and outstanding, bills, property spending, and pool status.',
+    gives: 'A quick monthly picture without opening the app.',
+    needs: 'Nothing new.',
+    cost: 'R0.',
+  },
+]
+
+const CHOICES = [
+  ['approve', 'Approve'],
+  ['later', 'Not now'],
+  ['questions', 'Questions'],
+]
+
+const DRAFT_KEY = 'house-hub.overview.answers'
+const form = document.getElementById('approvals')
+const nameInput = document.getElementById('reply-name')
+const replyText = document.getElementById('reply-text')
+const whatsapp = document.getElementById('send-whatsapp')
+const copyButton = document.getElementById('copy-reply')
+const copyStatus = document.getElementById('copy-status')
+
+function el(tag, attrs, children) {
+  const node = document.createElement(tag)
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (key === 'text') node.textContent = value
+    else node.setAttribute(key, value)
+  }
+  for (const child of children || []) node.append(child)
+  return node
+}
+
+for (const item of ROADMAP) {
+  const meta = el('dl', { class: 'item-meta' }, [
+    el('dt', { text: 'Gives you' }), el('dd', { text: item.gives }),
+    el('dt', { text: 'Needs' }), el('dd', { text: item.needs }),
+    el('dt', { text: 'Cost' }), el('dd', { text: item.cost }),
+  ])
+  const choice = el('div', { class: 'choice', role: 'radiogroup', 'aria-label': `Decision for ${item.title}` },
+    CHOICES.map(([value, label]) => el('label', {}, [
+      el('input', { type: 'radio', name: item.id, value, id: `${item.id}-${value}` }),
+      label,
+    ])))
+  const note = el('textarea', { id: `${item.id}-note`, name: `${item.id}-note`, rows: '2', placeholder: 'Note (optional)', 'aria-label': `Note for ${item.title}` })
+  form.append(el('article', { class: 'item' }, [
+    el('div', { class: 'item-head' }, [el('h3', { text: item.title })]),
+    el('p', { text: item.what }),
+    meta,
+    choice,
+    note,
+  ]))
+}
+
+function readAnswers() {
+  const data = new FormData(form)
+  return ROADMAP.map((item) => ({
+    item,
+    decision: data.get(item.id),
+    note: String(data.get(`${item.id}-note`) || '').trim(),
+  }))
+}
+
+function buildReply() {
+  const name = nameInput.value.trim()
+  const lines = [`House Hub roadmap${name ? ` – ${name}` : ''}`, '']
+  for (const { item, decision, note } of readAnswers()) {
+    const label = (CHOICES.find(([value]) => value === decision) || [null, 'No answer'])[1]
+    lines.push(`${item.title}: ${label}${note ? ` – ${note}` : ''}`)
+  }
+  return lines.join('\n')
+}
+
+function render() {
+  const text = buildReply()
+  replyText.value = text
+  whatsapp.href = `https://wa.me/?text=${encodeURIComponent(text)}`
+  try {
+    const saved = { name: nameInput.value, answers: Object.fromEntries(new FormData(form)) }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(saved))
+  } catch (error) {
+    // Storage unavailable (private browsing); answers just won't be remembered.
+  }
+}
+
+function restore() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null')
+    if (!saved) return
+    nameInput.value = saved.name || ''
+    for (const [key, value] of Object.entries(saved.answers || {})) {
+      const field = form.elements.namedItem(key)
+      if (!field) continue
+      if (field instanceof RadioNodeList) field.value = value
+      else field.value = value
+    }
+  } catch (error) {
+    // Ignore unreadable drafts.
+  }
+}
+
+form.addEventListener('input', render)
+form.addEventListener('change', render)
+nameInput.addEventListener('input', render)
+copyButton.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(replyText.value)
+    copyStatus.textContent = 'Copied. Paste it into a message to Paul.'
+  } catch (error) {
+    replyText.select()
+    copyStatus.textContent = 'Select the text above and copy it.'
+  }
+})
+
+restore()
+render()
+</script>
+</body>
+</html>

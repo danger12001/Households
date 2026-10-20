@@ -130,6 +130,9 @@ export function Login() {
       <p className="text-center text-secondary small mt-3">
         Tenants: sign in with the email your landlord added to the household.
       </p>
+      <p className="text-center small">
+        <a href="./overview.html">What is House Hub?</a>
+      </p>
     </div>
   )
 }

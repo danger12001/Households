@@ -23,6 +23,7 @@ Pi**, on Firebase's free Spark plan.
 | Utilities | Bills (photo of the bill attached) split equally, by weight, by **days lived in the house × weight**, or by **sub-meter usage**. Each bill creates a matching expense so it flows into balances. Meter readings log usage per day between readings. |
 | Property | The pool and anything else on the property (garden, borehole, solar/inverter, generator…): details, a log of tests/maintenance/issues with readings flagged against target ranges (pool pH, chlorine, alkalinity…), and supplies stock with reorder levels - chemicals recorded in a log come off stock automatically. Shows related calendar events and spending. New types are a config entry in `src/lib/assets.ts`. |
 | Ledgers | Separate running totals that don't affect balances, each optionally tied to one tenant, with a target and progress bar. Landlords add entries (or copy one from an expense). Tenants send entry **requests with a receipt photo**, which a landlord approves or rejects. Sync with a Google Sheet (push / pull), upload `.xlsx`/`.csv`, download `.xlsx`. |
+| Overview | A public page for landlords (`/overview.html`, or `#/overview` in the app) describing what House Hub does, its running costs and the roadmap, with an approve / not now / questions form that turns into a WhatsApp message. |
 | Currency | Everything is recorded in **rand (ZAR)**. Landlords also see amounts in their own currency (EUR by default, changeable) at the daily ECB rate from [Frankfurter](https://frankfurter.dev) or a fixed estimate they enter. |
 
 ### Who can do what
@@ -144,8 +145,19 @@ All under `households/{householdId}`:
 
 ## Roadmap
 
-- **Smart meters:** a small collector on the Pi that reads the meter (or its
-  cloud API) and writes `meterReadings` with `source: "pi-collector"` using a
-  Firebase service account.
-- **Reading bills and receipts automatically:** photo → amounts/period via an
-  AI vision model, filled into the forms for review.
+Proposed next steps, pending landlord approval on the
+[overview page](https://danger12001.github.io/Households/overview.html)
+(`public/overview.html`, also at `#/overview` in the app, no sign-in needed).
+
+| Item | What it does | Needs | Cost |
+| --- | --- | --- | --- |
+| Smart meter readings | A collector on a Raspberry Pi reads the Tuya electricity meters over the LAN (`tinytuya`, local keys) every ~15 min and writes `meterReadings` with `source: "tuya"` using a Firebase service account | Pi at the house; one-off Tuya IoT Platform setup to get local keys | Pi hardware; R0 to run |
+| Electricity split by actual use | The bill form fills each tenant's sub-meter usage for the billing period from meter readings | Smart meter readings | R0 |
+| Smart-home apps via API | Same collector gains a `mode: cloud` per device using Tuya's cloud API (Access ID/Secret kept on the Pi), and later other vendors (Shelly, SmartThings, Home Assistant) writing the same reading shape | Tuya cloud project | Free trial tier; paid subscription if outgrown |
+| Rent and maintenance reminders | Reminders before rent is due, when a tenant falls behind, and before contractor visits | Scheduled job on the Pi, or Firebase Blaze + Cloud Functions | Expected R0 at this size; Blaze needs a card on file |
+| Read bills and receipts from photos | Photo → amounts, dates and billing period filled in for review, via an AI vision model | API key kept on the Pi (never in the static site) | A few cents per photo |
+| Monthly landlord report | One-page monthly summary in rand and the landlord currency: rent received/outstanding, bills, property spending, pool status | Nothing new | R0 |
+
+The app itself never talks to meters or third-party APIs: anything that needs
+a secret runs on the Pi and writes plain documents into Firestore, so House Hub
+stays a static site.

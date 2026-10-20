@@ -8,6 +8,7 @@ import { LandlordRoute } from './components/LandlordRoute'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { SetupNeeded } from './components/SetupNeeded'
 import { Login } from './pages/Login'
+import { Overview } from './pages/Overview'
 import { Dashboard } from './pages/Dashboard'
 import { Expenses } from './pages/Expenses'
 import { ExpenseForm } from './pages/ExpenseForm'
@@ -34,6 +35,7 @@ function App() {
         <HashRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/overview" element={<Overview />} />
             <Route
               element={
                 <ProtectedRoute>
