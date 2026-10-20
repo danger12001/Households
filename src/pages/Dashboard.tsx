@@ -9,7 +9,73 @@ import { computeNet, simplifyDebts } from '../lib/balances'
 import { addDays, formatDate, formatDateTime, todayISO } from '../lib/dates'
 import { CATEGORY_ICONS, EVENT_ICONS } from '../lib/labels'
 import { allOccurrencesBetween } from '../lib/recurrence'
+import { useRent } from '../hooks/useRent'
 import type { Expense, HouseEvent, Settlement } from '../types'
+
+function RentCard() {
+  const { me, isLandlord } = useActiveHousehold()
+  const { statements, entries, loading } = useRent()
+  if (loading) return <Card className="h-100" body />
+
+  const pending = entries.filter((e) => e.status === 'pending').length
+  if (isLandlord) {
+    const outstanding = [...statements.values()].reduce((sum, s) => sum + Math.max(0, s.outstandingCents), 0)
+    const behind = [...statements.values()].filter((s) => s.outstandingCents > 0).length
+    return (
+      <Card className="h-100">
+        <Card.Body>
+          <div className="text-secondary small">Rent outstanding</div>
+          <div className={`stat-value ${outstanding > 0 ? 'text-danger' : 'text-success'}`}>
+            <Money cents={outstanding} />
+          </div>
+          <div className="small text-secondary">
+            {behind ? `${behind} ${behind === 1 ? 'tenant' : 'tenants'} behind` : 'everyone is up to date'}
+            {pending > 0 && (
+              <Badge bg="warning" text="dark" className="ms-1">
+                {pending} to confirm
+              </Badge>
+            )}
+          </div>
+          <Link to="/rent" className="small">
+            Rent overview
+          </Link>
+        </Card.Body>
+      </Card>
+    )
+  }
+
+  const statement = me ? statements.get(me.id) : undefined
+  return (
+    <Card className="h-100">
+      <Card.Body>
+        <div className="text-secondary small">Your rent</div>
+        {statement ? (
+          <>
+            <div className={`stat-value ${statement.outstandingCents > 0 ? 'text-danger' : 'text-success'}`}>
+              <Money cents={Math.abs(statement.outstandingCents)} />
+            </div>
+            <div className="small text-secondary">
+              {statement.outstandingCents > 0 ? 'outstanding' : statement.outstandingCents < 0 ? 'in credit' : 'up to date'}
+              {statement.nextDue && (
+                <>
+                  {' '}
+                  · next <Money cents={statement.nextDue.amountCents} noConvert /> on {formatDate(statement.nextDue.date)}
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="small text-secondary">Not set up yet.</div>
+        )}
+        {me && (
+          <Link to={`/rent/${me.id}`} className="small">
+            Statement & pay
+          </Link>
+        )}
+      </Card.Body>
+    </Card>
+  )
+}
 
 export function Dashboard() {
   const { me, isLandlord, memberName } = useActiveHousehold()
@@ -61,10 +127,13 @@ export function Dashboard() {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={8}>
+        <Col md={4}>
+          <RentCard />
+        </Col>
+        <Col md={4}>
           <Card className="h-100">
             <Card.Body className="d-flex flex-column justify-content-center">
-              <div className="d-grid gap-2 d-sm-flex">
+              <div className="d-grid gap-2">
                 <LinkButton to="/expenses/new">
                   <i className="bi bi-plus-lg me-1" />
                   Add expense claim

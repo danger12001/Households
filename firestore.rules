@@ -142,6 +142,32 @@ service cloud.firestore {
           || (isMember(hid) && resource.data.createdBy == email() && resource.data.status != 'approved');
       }
 
+      // Rent terms: landlords manage; each tenant reads only their own.
+      match /tenancies/{memberId} {
+        allow read: if isLandlord(hid) || (isMember(hid) && resource.data.tenantEmail == email());
+        allow write: if isLandlord(hid);
+      }
+
+      // Rent payments/charges/credits: landlords manage; a tenant may report a
+      // payment of their own (pending until a landlord confirms it) and
+      // withdraw it until it's confirmed.
+      match /rentEntries/{id} {
+        allow read: if isLandlord(hid) || (isMember(hid) && resource.data.tenantEmail == email());
+        allow create: if isLandlord(hid)
+          || (isMember(hid)
+            && request.resource.data.createdBy == email()
+            && request.resource.data.kind == 'payment'
+            && request.resource.data.status == 'pending'
+            && request.resource.data.tenantEmail == email()
+            && isMe(hid, request.resource.data.memberId)
+            && request.resource.data.amountCents is int
+            && request.resource.data.amountCents > 0
+            && !('reviewedBy' in request.resource.data));
+        allow update: if isLandlord(hid);
+        allow delete: if isLandlord(hid)
+          || (isMember(hid) && resource.data.createdBy == email() && resource.data.status != 'confirmed');
+      }
+
       // Calendar, contractors, utility bills and meter readings: landlords manage, tenants read.
       match /{landlordManaged}/{id} {
         allow read: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings'] && isMember(hid);

@@ -6,6 +6,7 @@ import { useActiveHousehold } from '../contexts/HouseholdContext'
 
 const LINKS = [
   { to: '/', label: 'Home', icon: 'house' },
+  { to: '/rent', label: 'Rent', icon: 'house-check' },
   { to: '/expenses', label: 'Expenses', icon: 'receipt' },
   { to: '/balances', label: 'Balances', icon: 'arrow-left-right' },
   { to: '/calendar', label: 'Calendar', icon: 'calendar-week' },

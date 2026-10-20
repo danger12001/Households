@@ -9,6 +9,7 @@ import { formatDate } from '../lib/dates'
 import { fetchRate, LANDLORD_CURRENCIES, type RateQuote } from '../lib/exchange'
 import { newId, saveMembers, updateHouseholdSettings } from '../services/db'
 import { relinkTenantLedgers } from '../services/ledgers'
+import { relinkTenantRent } from '../services/rent'
 import type { Member, Role } from '../types'
 
 export function HouseholdSettings() {
@@ -44,6 +45,7 @@ function MembersCard() {
       // Tenant ledgers are scoped by email, so follow the member to their new address.
       if (previous && previous.email !== member.email) {
         await relinkTenantLedgers({ ...household, members }, member.id)
+        await relinkTenantRent({ ...household, members }, member.id)
       }
       setEditing(null)
     } catch (err) {

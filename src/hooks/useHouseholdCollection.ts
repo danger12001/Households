@@ -13,6 +13,8 @@ export type HouseholdCollection =
   | 'meterReadings'
   | 'ledgers'
   | 'ledgerEntries'
+  | 'tenancies'
+  | 'rentEntries'
 
 /**
  * Live view of a household sub-collection. Households are small (tens to low

@@ -15,6 +15,7 @@ Pi**, on Firebase's free Spark plan.
 | Area | What it does |
 | --- | --- |
 | Household | Members with roles (landlord / tenant), room, move-in/out dates, utility weight. Sign-in is by email: a landlord adds someone's email and they get access when they sign in with it. |
+| Rent | Per-tenant monthly rent, due day, start/end dates, deposit and rent increases with an effective date. Shows each tenant's outstanding balance, next due date and a running statement. Landlords record payments, one-off charges (deposit, late fee, partial month) and credits; tenants report payments (optionally with proof of payment) for a landlord to confirm. Tenants only ever see their own rent. |
 | Expenses | Claims with category (dogs, electronics, pool, …), date, payer, receipt photos and an equal / by-shares / exact split. Anyone charged can dispute their share; disputed claims are left out of balances until a landlord resolves them. |
 | Balances | Net position per member and the fewest payments that settle everyone up. Record payments (settlements). |
 | Calendar | Month grid + agenda of contractor visits and household jobs, with weekly / fortnightly / monthly repeats. |
@@ -32,6 +33,7 @@ Enforced by `firestore.rules`, not just hidden in the UI.
 | Members, settings, currency | manage | read |
 | Calendar, contractors, utility bills, meter readings | manage | read |
 | Expense claims | manage all | add/edit/delete **own** claims (that they paid), dispute claims they're charged for |
+| Rent | set up terms, record payments/charges/credits, confirm or reject reported payments | read **own** terms and statement; report a payment (pending); withdraw it until confirmed |
 | Payments (settlements) | manage all | record payments they made or received; delete their own |
 | Ledgers | manage all, approve/reject requests, sheet sync | read ledgers linked to them; request entries with a receipt photo; withdraw unreviewed requests |
 
@@ -64,7 +66,7 @@ npm run dev                      # http://localhost:5070
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Vite dev server on port 5070 (also exposed on your LAN) |
-| `npm test` | Unit tests (splits, balances, bill splitting, recurrence, spreadsheet mapping) |
+| `npm test` | Unit tests (splits, balances, bill splitting, rent statements, recurrence, spreadsheet mapping) |
 | `npm run lint` | oxlint |
 | `npm run build` | Type-check and build to `dist/` |
 | `npm run preview` | Serve the built `dist/` on port 5070 |
@@ -134,6 +136,8 @@ All under `households/{householdId}`:
 | `settlements/{id}` | payment `from` → `to` |
 | `events/{id}`, `contractors/{id}` | calendar |
 | `bills/{id}`, `meterReadings/{id}` | utilities; `meterReadings.source` is `manual` or the name of an automated collector |
+| `tenancies/{memberId}` | rent terms: `dueDay`, `startDate`, `endDate`, `schedule` (`[{ from, amountCents }]`), deposit; kept out of the household doc so tenants can't see each other's rent |
+| `rentEntries/{id}` | `payment` / `charge` / `credit` against a tenant; `status` is `confirmed` / `pending` / `rejected`. Monthly rent itself isn't stored - it's calculated from the tenancy |
 | `ledgers/{id}`, `ledgerEntries/{id}` | entries carry `ledgerId` and the tenant's email (for rules); `status` is `approved` / `pending` / `rejected` |
 
 ## Roadmap

@@ -235,6 +235,51 @@ export interface LedgerEntry {
   reviewedAt?: number
 }
 
+/**
+ * A tenant's rent terms, kept out of the household doc (which every member
+ * can read) so tenants only see their own. Doc id = member id.
+ */
+export interface Tenancy {
+  id: string
+  memberId: string
+  /** Denormalised from the member for security rules / queries. */
+  tenantEmail?: string
+  /** Day of the month rent is due (clamped to short months). */
+  dueDay: number
+  /** First day rent applies ('YYYY-MM-DD'); the first charge is the first due date on/after this. */
+  startDate: string
+  /** Last day of the tenancy, if it has ended or an end is agreed. */
+  endDate?: string
+  /** Monthly rent with the date each amount took effect, oldest first. */
+  schedule: { from: string; amountCents: number }[]
+  depositCents?: number
+  notes?: string
+  updatedAt: number
+}
+
+export type RentEntryKind = 'payment' | 'charge' | 'credit'
+
+/** Anything besides the regular monthly rent that moves a tenant's balance. */
+export interface RentEntry {
+  id: string
+  memberId: string
+  tenantEmail?: string
+  /** payment and credit reduce what's owed; charge (deposit, late fee…) increases it. */
+  kind: RentEntryKind
+  /** Always positive; kind decides the direction. */
+  amountCents: number
+  date: string
+  note?: string
+  receiptIds: string[]
+  /** Tenants submit 'pending' payments; only 'confirmed' entries count. */
+  status: 'confirmed' | 'pending' | 'rejected'
+  rejectReason?: string
+  createdBy: string
+  createdAt: number
+  reviewedBy?: string
+  reviewedAt?: number
+}
+
 export interface MeterReading {
   id: string
   meter: string
