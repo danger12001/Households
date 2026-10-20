@@ -20,6 +20,8 @@ import { BillForm } from './pages/BillForm'
 import { HouseholdSettings } from './pages/HouseholdSettings'
 import { Ledgers } from './pages/Ledgers'
 import { Rent } from './pages/Rent'
+import { Property } from './pages/Property'
+import { AssetDetail } from './pages/AssetDetail'
 import { RentStatementPage } from './pages/RentStatement'
 import { LedgerDetail } from './pages/LedgerDetail'
 
@@ -55,6 +57,8 @@ function App() {
               <Route path="utilities/:id" element={<BillForm />} />
               <Route path="rent" element={<Rent />} />
               <Route path="rent/:memberId" element={<RentStatementPage />} />
+              <Route path="property" element={<Property />} />
+              <Route path="property/:id" element={<AssetDetail />} />
               <Route path="ledgers" element={<Ledgers />} />
               <Route path="ledgers/:id" element={<LedgerDetail />} />
               <Route path="household" element={<HouseholdSettings />} />

@@ -280,6 +280,47 @@ export interface RentEntry {
   reviewedAt?: number
 }
 
+/** Something on the property that needs looking after (pool, borehole…). Types are configured in lib/assets.ts. */
+export interface Asset {
+  id: string
+  name: string
+  type: string
+  /** Free-form facts keyed by the type's detail fields (volume, pump model…). */
+  details: Record<string, string>
+  contractorId?: string
+  notes?: string
+  createdAt: number
+}
+
+export type AssetLogKind = 'test' | 'maintenance' | 'issue'
+
+export interface AssetLog {
+  id: string
+  assetId: string
+  /** 'YYYY-MM-DDTHH:mm' local time. */
+  takenAt: string
+  kind: AssetLogKind
+  /** Values keyed by the type's reading definitions (ph, chlorine…). */
+  readings: Record<string, number>
+  note?: string
+  /** Supplies used; their stock was reduced when the log was saved. */
+  supplyUsage: { supplyId: string; quantity: number }[]
+  receiptIds: string[]
+  createdBy: string
+  createdAt: number
+}
+
+export interface Supply {
+  id: string
+  assetId: string
+  name: string
+  unit: string
+  quantity: number
+  /** Flag as low at or below this quantity. */
+  reorderAt?: number
+  updatedAt: number
+}
+
 export interface MeterReading {
   id: string
   meter: string

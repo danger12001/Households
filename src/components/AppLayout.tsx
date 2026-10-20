@@ -12,6 +12,7 @@ const LINKS = [
   { to: '/calendar', label: 'Calendar', icon: 'calendar-week' },
   { to: '/contractors', label: 'Contractors', icon: 'tools' },
   { to: '/utilities', label: 'Utilities', icon: 'lightning-charge' },
+  { to: '/property', label: 'Property', icon: 'tree' },
   { to: '/ledgers', label: 'Ledgers', icon: 'journal-text' },
   { to: '/household', label: 'Household', icon: 'people' },
 ]

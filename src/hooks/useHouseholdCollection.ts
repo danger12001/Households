@@ -15,6 +15,9 @@ export type HouseholdCollection =
   | 'ledgerEntries'
   | 'tenancies'
   | 'rentEntries'
+  | 'assets'
+  | 'assetLogs'
+  | 'supplies'
 
 /**
  * Live view of a household sub-collection. Households are small (tens to low

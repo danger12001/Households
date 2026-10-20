@@ -21,6 +21,7 @@ Pi**, on Firebase's free Spark plan.
 | Calendar | Month grid + agenda of contractor visits and household jobs, with weekly / fortnightly / monthly repeats. |
 | Contractors | Plumbers, electricians, pool service… with tap-to-call and WhatsApp links. |
 | Utilities | Bills (photo of the bill attached) split equally, by weight, by **days lived in the house × weight**, or by **sub-meter usage**. Each bill creates a matching expense so it flows into balances. Meter readings log usage per day between readings. |
+| Property | The pool and anything else on the property (garden, borehole, solar/inverter, generator…): details, a log of tests/maintenance/issues with readings flagged against target ranges (pool pH, chlorine, alkalinity…), and supplies stock with reorder levels - chemicals recorded in a log come off stock automatically. Shows related calendar events and spending. New types are a config entry in `src/lib/assets.ts`. |
 | Ledgers | Separate running totals that don't affect balances, each optionally tied to one tenant, with a target and progress bar. Landlords add entries (or copy one from an expense). Tenants send entry **requests with a receipt photo**, which a landlord approves or rejects. Sync with a Google Sheet (push / pull), upload `.xlsx`/`.csv`, download `.xlsx`. |
 | Currency | Everything is recorded in **rand (ZAR)**. Landlords also see amounts in their own currency (EUR by default, changeable) at the daily ECB rate from [Frankfurter](https://frankfurter.dev) or a fixed estimate they enter. |
 
@@ -31,7 +32,7 @@ Enforced by `firestore.rules`, not just hidden in the UI.
 | | Landlord | Tenant |
 | --- | --- | --- |
 | Members, settings, currency | manage | read |
-| Calendar, contractors, utility bills, meter readings | manage | read |
+| Calendar, contractors, utility bills, meter readings, property & supplies | manage | read |
 | Expense claims | manage all | add/edit/delete **own** claims (that they paid), dispute claims they're charged for |
 | Rent | set up terms, record payments/charges/credits, confirm or reject reported payments | read **own** terms and statement; report a payment (pending); withdraw it until confirmed |
 | Payments (settlements) | manage all | record payments they made or received; delete their own |
@@ -66,7 +67,7 @@ npm run dev                      # http://localhost:5070
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Vite dev server on port 5070 (also exposed on your LAN) |
-| `npm test` | Unit tests (splits, balances, bill splitting, rent statements, recurrence, spreadsheet mapping) |
+| `npm test` | Unit tests (splits, balances, bill splitting, rent statements, property readings, recurrence, spreadsheet mapping) |
 | `npm run lint` | oxlint |
 | `npm run build` | Type-check and build to `dist/` |
 | `npm run preview` | Serve the built `dist/` on port 5070 |
@@ -136,6 +137,7 @@ All under `households/{householdId}`:
 | `settlements/{id}` | payment `from` → `to` |
 | `events/{id}`, `contractors/{id}` | calendar |
 | `bills/{id}`, `meterReadings/{id}` | utilities; `meterReadings.source` is `manual` or the name of an automated collector |
+| `assets/{id}`, `assetLogs/{id}`, `supplies/{id}` | property items (`type` keys into `ASSET_TYPES`), their logs (`readings`, `supplyUsage`) and stock; saving/deleting a log adjusts stock with `increment()` |
 | `tenancies/{memberId}` | rent terms: `dueDay`, `startDate`, `endDate`, `schedule` (`[{ from, amountCents }]`), deposit; kept out of the household doc so tenants can't see each other's rent |
 | `rentEntries/{id}` | `payment` / `charge` / `credit` against a tenant; `status` is `confirmed` / `pending` / `rejected`. Monthly rent itself isn't stored - it's calculated from the tenancy |
 | `ledgers/{id}`, `ledgerEntries/{id}` | entries carry `ledgerId` and the tenant's email (for rules); `status` is `approved` / `pending` / `rejected` |

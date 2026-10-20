@@ -168,10 +168,10 @@ service cloud.firestore {
           || (isMember(hid) && resource.data.createdBy == email() && resource.data.status != 'confirmed');
       }
 
-      // Calendar, contractors, utility bills and meter readings: landlords manage, tenants read.
+      // Calendar, contractors, utility bills, meter readings and property assets: landlords manage, tenants read.
       match /{landlordManaged}/{id} {
-        allow read: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings'] && isMember(hid);
-        allow write: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings'] && isLandlord(hid);
+        allow read: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings', 'assets', 'assetLogs', 'supplies'] && isMember(hid);
+        allow write: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings', 'assets', 'assetLogs', 'supplies'] && isLandlord(hid);
       }
     }
   }
