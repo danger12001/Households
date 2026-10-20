@@ -58,16 +58,16 @@ Enforced by `firestore.rules`, not just hidden in the UI.
 ```bash
 cp env-template.txt .env.local   # then fill in the VITE_FIREBASE_* values
 npm install
-npm run dev                      # http://localhost:5060
+npm run dev                      # http://localhost:5070
 ```
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Vite dev server on port 5060 (also exposed on your LAN) |
+| `npm run dev` | Vite dev server on port 5070 (also exposed on your LAN) |
 | `npm test` | Unit tests (splits, balances, bill splitting, recurrence, spreadsheet mapping) |
 | `npm run lint` | oxlint |
 | `npm run build` | Type-check and build to `dist/` |
-| `npm run preview` | Serve the built `dist/` on port 5060 |
+| `npm run preview` | Serve the built `dist/` on port 5070 |
 | `npm run deploy:rules` | Deploy `firestore.rules` / `firestore.indexes.json` |
 
 ### 3. First household
