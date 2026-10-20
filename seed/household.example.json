@@ -1,0 +1,52 @@
+{
+  "_comment": "Example households/{householdId} document. Replace the <...> emails, keep memberEmails/landlordEmails in sync with members, and delete this _comment field.",
+  "name": "Osiris House",
+  "currency": "ZAR",
+  "landlordCurrency": "EUR",
+  "rateSource": "auto",
+  "createdAt": 1792540800000,
+  "members": {
+    "peter": {
+      "id": "peter",
+      "name": "Peter",
+      "email": "<peter's sign-in email, lowercase>",
+      "role": "landlord",
+      "weight": 1,
+      "sharesUtilities": false
+    },
+    "kim": {
+      "id": "kim",
+      "name": "Kim",
+      "email": "<kim's sign-in email, lowercase>",
+      "role": "landlord",
+      "weight": 1,
+      "sharesUtilities": false
+    },
+    "nathan-sian": {
+      "id": "nathan-sian",
+      "name": "Nathan & Sian",
+      "email": "<the email Nathan or Sian will sign in with>",
+      "role": "tenant",
+      "weight": 2,
+      "sharesUtilities": true
+    },
+    "paul": {
+      "id": "paul",
+      "name": "Paul",
+      "email": "<your sign-in email, lowercase>",
+      "role": "tenant",
+      "weight": 1,
+      "sharesUtilities": true
+    }
+  },
+  "memberEmails": [
+    "<peter's sign-in email, lowercase>",
+    "<kim's sign-in email, lowercase>",
+    "<the email Nathan or Sian will sign in with>",
+    "<your sign-in email, lowercase>"
+  ],
+  "landlordEmails": [
+    "<peter's sign-in email, lowercase>",
+    "<kim's sign-in email, lowercase>"
+  ]
+}

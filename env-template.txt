@@ -1,0 +1,10 @@
+Copy these into a .env.local file (not committed) in the project root,
+filled in with your Firebase web app config values
+(Firebase console > Project settings > Your apps > Web app):
+
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=

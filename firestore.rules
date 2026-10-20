@@ -1,0 +1,152 @@
+rules_version = '2';
+
+// Access model
+// - A household doc lists its members' emails (memberEmails) and the subset
+//   who are landlords (landlordEmails). Sign-in identity is the verified email.
+// - Landlords can read and change everything in their household.
+// - Tenants can read everything, and write only expense claims: create/edit/
+//   delete their own claims (that they paid), attach receipt photos, dispute
+//   claims they're charged for, and record payments they made or received.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+
+    function email() {
+      return request.auth.token.email.lower();
+    }
+
+    function household(hid) {
+      return get(/databases/$(database)/documents/households/$(hid)).data;
+    }
+
+    function isMember(hid) {
+      return signedIn() && email() in household(hid).memberEmails;
+    }
+
+    function isLandlord(hid) {
+      return signedIn() && email() in household(hid).landlordEmails;
+    }
+
+    // The member record `memberId` belongs to the signed-in user.
+    function isMe(hid, memberId) {
+      let members = household(hid).members;
+      return memberId is string && memberId in members && members[memberId].get('email', '') == email();
+    }
+
+    function validHousehold(data) {
+      return data.name is string && data.name.size() > 0
+        && data.members is map
+        && data.memberEmails is list
+        && data.landlordEmails is list
+        && data.memberEmails.hasAll(data.landlordEmails);
+    }
+
+    match /households/{hid} {
+      allow read: if signedIn() && email() in resource.data.memberEmails;
+      allow create: if signedIn()
+        && validHousehold(request.resource.data)
+        && email() in request.resource.data.landlordEmails;
+      // Landlords can't demote themselves, so a household always keeps a landlord.
+      allow update: if signedIn()
+        && email() in resource.data.landlordEmails
+        && validHousehold(request.resource.data)
+        && email() in request.resource.data.landlordEmails;
+      allow delete: if signedIn() && email() in resource.data.landlordEmails;
+
+      match /expenses/{id} {
+        allow read: if isMember(hid);
+
+        allow create: if isLandlord(hid)
+          || (isMember(hid)
+            && request.resource.data.createdBy == email()
+            && request.resource.data.status == 'open'
+            && !('billId' in request.resource.data)
+            && isMe(hid, request.resource.data.paidBy));
+
+        allow update: if isLandlord(hid)
+          // The claimant edits their own open claim, without touching dispute fields.
+          || (isMember(hid)
+            && resource.data.createdBy == email()
+            && request.resource.data.createdBy == email()
+            && !('billId' in resource.data)
+            && isMe(hid, request.resource.data.paidBy)
+            && !request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['status', 'disputeNote', 'disputedBy', 'billId']))
+          // Anyone charged a share may dispute it.
+          || (isMember(hid)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'disputeNote', 'disputedBy', 'updatedAt'])
+            && request.resource.data.status == 'disputed'
+            && request.resource.data.disputedBy in resource.data.allocations
+            && isMe(hid, request.resource.data.disputedBy));
+
+        allow delete: if isLandlord(hid)
+          || (isMember(hid) && resource.data.createdBy == email() && !('billId' in resource.data));
+      }
+
+      match /receipts/{id} {
+        allow read: if isMember(hid);
+        allow create: if isMember(hid)
+          && request.resource.data.createdBy == email()
+          && request.resource.data.dataUrl is string
+          && request.resource.data.dataUrl.size() < 1000000;
+        allow delete: if isLandlord(hid) || (isMember(hid) && resource.data.createdBy == email());
+      }
+
+      match /settlements/{id} {
+        allow read: if isMember(hid);
+        allow create: if isLandlord(hid)
+          || (isMember(hid)
+            && request.resource.data.createdBy == email()
+            && (isMe(hid, request.resource.data.from) || isMe(hid, request.resource.data.to)));
+        allow update: if isLandlord(hid);
+        allow delete: if isLandlord(hid) || (isMember(hid) && resource.data.createdBy == email());
+      }
+
+      // Ledgers: landlords manage; the linked tenant (by email) can read theirs.
+      match /ledgers/{id} {
+        allow read: if isLandlord(hid) || (isMember(hid) && resource.data.tenantEmail == email());
+        allow write: if isLandlord(hid);
+      }
+
+      // Ledger entries: the linked tenant may request entries (pending, with at
+      // least one receipt photo) and edit/withdraw them until reviewed.
+      match /ledgerEntries/{id} {
+        function ledgerTenantEmail(ledgerId) {
+          return get(/databases/$(database)/documents/households/$(hid)/ledgers/$(ledgerId)).data.get('tenantEmail', '');
+        }
+
+        function validRequest(data) {
+          return data.createdBy == email()
+            && data.status == 'pending'
+            && data.tenantEmail == email()
+            && ledgerTenantEmail(data.ledgerId) == email()
+            && data.receiptIds is list
+            && data.receiptIds.size() > 0
+            && !('reviewedBy' in data);
+        }
+
+        allow read: if isLandlord(hid) || (isMember(hid) && resource.data.tenantEmail == email());
+        allow create: if isLandlord(hid) || (isMember(hid) && validRequest(request.resource.data));
+        allow update: if isLandlord(hid)
+          || (isMember(hid)
+            && resource.data.createdBy == email()
+            && resource.data.status == 'pending'
+            && request.resource.data.ledgerId == resource.data.ledgerId
+            && validRequest(request.resource.data));
+        allow delete: if isLandlord(hid)
+          || (isMember(hid) && resource.data.createdBy == email() && resource.data.status != 'approved');
+      }
+
+      // Calendar, contractors, utility bills and meter readings: landlords manage, tenants read.
+      match /{landlordManaged}/{id} {
+        allow read: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings'] && isMember(hid);
+        allow write: if landlordManaged in ['events', 'contractors', 'bills', 'meterReadings'] && isLandlord(hid);
+      }
+    }
+  }
+}
